@@ -4,7 +4,7 @@
 import platform
 import win32com
 import wmi
-    '''    pip install pypiwin32 wmi    '''
+'''    pip install pypiwin32 wmi    '''
 
 def collect():
     data = {
@@ -17,7 +17,7 @@ def collect():
     win32obj = Win32Info()
     data.update(win32obj.get_cpu_info())
     data.update(win32obj.get_ram_info())
-    data.update(win32obj.get_motherborad_info())
+    data.update(win32obj.get_motherboard_info())
     data.update(win32obj.get_disk_info())
     data.update(win32obj.get_nic_info())
     # 返回数据
@@ -35,7 +35,7 @@ class Win32Info(object):
         :return:
         '''
         data = {}
-        cpu_lists = self.wmi_boj.Win32_Processor()
+        cpu_lists = self.wmi_obj.Win32_Processor()
         cpu_core_count = 0
         for cpu in cpu_lists:
             cpu_core_count += cpu.NumberOfCores
@@ -80,7 +80,7 @@ class Win32Info(object):
         data = dict()
         data['manufacturer'] = computer_info.Manufacturer
         data['model'] = computer_info.Model
-        data['wake_up_type'] = computer_info.WekaUpType
+        data['wake_up_type'] = computer_info.WakeUpType
         data['sn'] = system_info.SerialNumber
         return data
     def get_disk_info(self):
@@ -118,7 +118,7 @@ class Win32Info(object):
                 item_data['mac'] = nic.MACAddress
                 item_data['model'] = nic.Caption
                 item_data['name'] = nic.Index
-                if nic.IPAddress in not None:
+                if nic.IPAddress is not None:
                     item_data['ip_address'] = nic.IPAddress[0]
                     item_data['net_mask'] = nic.IPSubnet
                 else:
