@@ -3,8 +3,12 @@
 
 import json
 import time
-import urllib.parse
-import urllib.request
+import urlparse
+# python3 用urllib.parse
+#import urllib.parse
+import urllib
+# python3 用urllib.request
+#import urllib.request
 from core import info_collection
 from conf import settings
 
@@ -60,8 +64,8 @@ class ArgvHandler(object):
         try:
             # 使用Python内置的urllib.request库，发送post请求。
             # 需要先将数据进行封装，并转换成bytes类型
-            data_encode = urllib.parse.urlencode(data).encode()
-            response = urllib.request.urlopen(url=url, data=data_encode, timeout=settings.Params['request_timeout'])
+            data_encode = urlparse.urlencode(data).encode()
+            response = urllib.urlopen(url=url, data=data_encode, timeout=settings.Params['request_timeout'])
             print('\033[31;1m发送完毕！\033[0m ')
             message = response.read().decode()
             print('返回结果: %s' % message)
@@ -70,6 +74,6 @@ class ArgvHandler(object):
             print('\033[31;1m发送失败，%s\033[0m' % e)
         # 记录发送日至
         with open(settings.PATH, 'ab') as f:
-            string = '发送时间: %s \t 服务器地址: %s \t 返回结果: %s' % (time.strftime(%Y-%m-%d %H:%M:%S), url, message)
+            string = '发送时间: %s \t 服务器地址: %s \t 返回结果: %s' % (time.strftime('%Y-%m-%d %H:%M:%S'), url, message)
             f.write(string.encode())
             print('日志记录成功!')
