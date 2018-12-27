@@ -12,6 +12,14 @@ import urllib
 from core import info_collection
 from conf import settings
 
+'''
+解决 UnicodeDecodeError: 'ascii' codec can't decode byte 0xe5 in position 0: ordinal not in range(128)
+经过搜寻网络上的资料，发现是ascii编码的问题，在自己程序代码前面加上以下三句，即可解决问题：
+'''
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
+
 class ArgvHandler(object):
     def __init__(self, args):
         self.args = args
@@ -57,14 +65,16 @@ class ArgvHandler(object):
         info = info_collection.InfoCollection()
         asset_data = info.collect()
         # 转换数据为json格式，打包成字典
-        data = {'asset_data': json_dumps(asset_data)}
+        data = {'asset_data': json.dumps(asset_data)}
         # 根据settings中的配置，构造url
-        url = 'http://%s:%s%s' % (settings.Params['server'], settings.Params['port'], setting.Params['url'])
+        url = 'http://%s:%s%s' % (settings.Params['server'], settings.Params['port'], settings.Params['url'])
         print('正在将数据发送至：[%s] ......' % url)
         try:
             # 使用Python内置的urllib.request库，发送post请求。
             # 需要先将数据进行封装，并转换成bytes类型
-            data_encode = urlparse.urlencode(data).encode()
+            data_encode = urllib.urlencode(data).encode()
+            # 对于urlencode(),python2 用urllib,python3 用urllib.parse
+            #data_encode = urllib.parse.urlencode(data).encode()
             response = urllib.urlopen(url=url, data=data_encode, timeout=settings.Params['request_timeout'])
             print('\033[31;1m发送完毕！\033[0m ')
             message = response.read().decode()

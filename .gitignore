@@ -4,3 +4,4 @@ venv_cmdb_layer
 __pycache__
 db.sqlite3
 .DS_Store
+.idea

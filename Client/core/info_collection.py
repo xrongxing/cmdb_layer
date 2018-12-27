@@ -14,6 +14,7 @@ def windows_sys_info():
 class InfoCollection(object):
     def collect(self):
         try:
+            #return {'pytest': platform.system()}
             func = getattr(self, platform.system())
             info_data = func()
             formatted_data = self.build_report_data(info_data)
