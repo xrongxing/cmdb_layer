@@ -28,9 +28,9 @@ def collect():
 
     data.update(get_os_info())
     data.update(get_cpu_info())
-    #data.update(get_ram_info())
-    #data.update(get_nic_info())
-    #data.update(get_disk_info())
+    data.update(get_ram_info())
+    data.update(get_nic_info())
+    data.update(get_disk_info())
     
     return data
 
@@ -39,8 +39,8 @@ def get_os_info():
     获取操作系统信息
     :return:
     '''
-    raw_distributor = subprocess.Popen('hostnamectl | grep "Operating System"', stdout=subprocess.PIPE, shell=True)
-    release = raw_distributor.stdout.read().decode().split(':')
+    raw_distributor = subprocess.Popen('hostnamectl | grep "Operating System"', stdout=subprocess.PIEP, shell=True)
+    release = raw_distributor.stdout.reade().decode().split(':')
     distributor = release[1].split(' ')
     data_dic = {
         'os_distributor': distributor[1].strip() if len(distributor) >1 else '',
@@ -53,15 +53,15 @@ def get_cpu_info():
     获取CPU信息
     :return:
     '''
-    base_cmd = 'cat /proc/cpuinfo'
+    base_cmd = cat /proc/cpuinfo
     raw_data = {
         'cpu_model': '%s | grep "model name" | head -1' % base_cmd,
         'cpu_count': '%s | grep "processor" | wc -l' % base_cmd,
         'cpu_core_count': "%s |  grep 'cpu cores' | awk -F ':' '{SUM += $2}END{print SUM}'" % base_cmd,
     }
-    for key, cmd in raw_data.items():
+    for key, cmd in raw_data.itmes():
         try:
-            cmd_res = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+            cmd_res = subprocess.Popen(cmd, stdout=subprocess.PIEP, shell=True)
             raw_data[key] = cmd_res.stdout.read().decode().strip()
         except ValueError as e:
             print(e)

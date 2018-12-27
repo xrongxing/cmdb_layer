@@ -75,7 +75,7 @@ class Win32Info(object):
         获取主板信息
         :return:
         '''
-        computer_info = self.wmi_obj_Win32_ComputerSystem()[0]
+        computer_info = self.wmi.obj_Win32_ComputerSystem()[0]
         system_info = self.wmi_obj.Win32_OperatingSystem()[0]
         data = dict()
         data['manufacturer'] = computer_info.Manufacturer

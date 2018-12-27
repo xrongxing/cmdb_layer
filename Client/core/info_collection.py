@@ -6,6 +6,7 @@ import platform
 def linux_sys_info():
     from plugins.linux import sys_info
     return sys_info.collect()
+    #return {'sssss': 'ssssss'}
 
 def windows_sys_info():
     from plugins.windows import sys_info as win_sys_info
@@ -25,5 +26,5 @@ class InfoCollection(object):
         return linux_sys_info()
     def Windows(self):
         return windows_sys_info()
-    def bulid_report_data(self, data):
+    def build_report_data(self, data):
         return data
