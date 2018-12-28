@@ -43,7 +43,7 @@ def get_os_info():
     release = raw_distributor.stdout.read().decode().split(':')
     distributor = release[1].split(' ')
     data_dic = {
-        'os_distributor': distributor[1].strip() if len(distributor) >1 else '',
+        'os_distribution': distributor[1].strip() if len(distributor) >1 else '',
         'os_release': release[1].strip() if len(release) > 1 else '',
         'os_type': 'Linux',
     }
@@ -66,14 +66,14 @@ def get_cpu_info():
         except ValueError as e:
             print(e)
             raw_data[key] = ''
-        data = {
-            key: raw_data[key],
-        }
+        #data = {
+        #    key: raw_data[key],
+        #}
 
-    #data = {
-    #    'cpu_count': raw_data['cpu_count'],
-    #    'cpu_core_count': raw_data['cpu_core_count'],
-    #}
+    data = {
+        'cpu_count': raw_data['cpu_count'],
+        'cpu_core_count': raw_data['cpu_core_count'],
+    }
     cpu_model = raw_data['cpu_model'].split(':')
     if len(cpu_model) > 1:
         data['cpu_model'] = cpu_model[1].strip()

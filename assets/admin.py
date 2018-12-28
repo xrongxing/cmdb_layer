@@ -5,8 +5,16 @@ from django.contrib import admin
 
 from . import models
 
+class NewAssetAdmin(admin.ModelAdmin):
+    list_display = ['asset_type', 'sn', 'model', 'manufacturer', 'c_time', 'm_time']
+    list_filter = ['asset_type', 'manufacturer', 'c_time']
+    search_fields = ('sn',)
+
+class AssetAdmin(admin.ModelAdmin):
+    list_display = ['asset_type', 'name', 'status', 'approved_by', 'c_time', "m_time"]
+
 # Register your models here.
-admin.site.register(models.Asset)
+admin.site.register(models.Asset, AssetAdmin)
 admin.site.register(models.Server)
 admin.site.register(models.SecurityDevice)
 admin.site.register(models.StorageDevice)
@@ -22,4 +30,4 @@ admin.site.register(models.RAM)
 admin.site.register(models.Disk)
 admin.site.register(models.NIC)
 admin.site.register(models.EventLog)
-admin.site.register(models.NewAssetApprovalZone)
+admin.site.register(models.NewAssetApprovalZone, NewAssetAdmin)
