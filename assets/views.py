@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.shortcuts import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
-from . import models, asset_handle
+from . import models, asset_handler
 
 # Create your views here.
 @csrf_exempt
@@ -17,8 +17,11 @@ def report(request):
     :return:
     '''
     if request.method == 'POST':
-        asset_data = request.POST.get('asset_data')
-        data = json.loads(asset_data)
+        if request.POST.get('asset_data'):
+            asset_data = request.POST.get('asset_data')
+            data = json.loads(asset_data)
+        else:
+            return HttpResponse('没有POST数据 asset_data')
         # 各种数据检查，请自行添加和完善！
         if not data:
             return HttpResponse('没有数据')
@@ -35,7 +38,7 @@ def report(request):
                 return HttpResponse('已审批资产已经更新')
             else:
                 # 数据库中没有相应的sn号，判断为未审批资产，进入新资产待审批区，更新或者创建资产。
-                obj = asset_handle.NewAsset(request, data)
+                obj = asset_handler.NewAsset(request, data)
                 response = obj.add_to_new_assets_zone()
                 return HttpResponse(response)
                 
