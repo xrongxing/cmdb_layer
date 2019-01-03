@@ -34,7 +34,7 @@ def report(request):
             asset_obj = models.Asset.objects.filter(sn=sn)
             if asset_obj:
                 # 进入已经上线资产的数据更新流程
-                pass
+                update_asset = asset_handler.UpdateAsset(request, asset_obj[0], data)
                 return HttpResponse('已审批资产已经更新')
             else:
                 # 数据库中没有相应的sn号，判断为未审批资产，进入新资产待审批区，更新或者创建资产。

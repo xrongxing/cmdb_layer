@@ -54,6 +54,15 @@ def log(log_type, msg=None, asset=None, new_asset=None, request=None):
         event.new_asset = new_asset
         event.detail = '审批失败: %s' % msg
         event.user = request.user
+    elif log_type == 'update':
+        event.name = '%s <%s>:    资产更新' % (asset.asset_type, asset.sn)
+        event.asset = asset
+        event.detail = '资产更新成功'
+    elif log_type == 'update_failed':
+        event.name == '%s <%s>    资产更新失败' % (asset.asset_type, asset.sn)
+        event.asset = asset
+        event.detail = '资产更新失败 %s' % msg
+
     event.save()
 
 class ApproveAsset(object):
@@ -215,3 +224,158 @@ class ApproveAsset(object):
         :return:
         '''
         self.new_asset.delete() 
+
+class UpdateAsset(object):
+#class UpdateAsset:
+    def __init__(self, request, asset, report_data):
+        self.request = request
+        self.asset = asset
+        self.report_data = report_data
+        self.asset_update()
+
+    def asset_update(self):
+        func = getattr(self, '_%s_update' % self.report_data['asset_type'])
+        func()
+
+    def _server_update(self):
+        try:
+            self._update_manufacturer()   # 更新厂商
+            self._update_server()         # 更新服务器
+            self._update_CPU()            # 更新CPU
+            self._update_RAM()            # 更新内存
+            self._update_disk()           # 更新硬盘
+            self._update_nic()            # 更新网卡
+            self.asset.save()
+        except Exception as e:
+            log('update_failed', msg=e, asset=self.asset, request=self.request)
+            print(e)
+        else:
+            log('update', asset=self.asset)
+            print('资产数据更新')
+
+    def _update_manufacturer(self):
+        '''
+        更新厂商
+        '''
+        m = self.report_data.get('manufacturer')
+        if m:
+            manufacturer_obj,_ = models.Manufacturer.objects.get_or_create(name=m)
+            self.asset.manufacturer = manufacturer_obj
+        else:
+            self.asset.manufacturer = None
+        self.asset.manufacturer.save()
+    def _update_server(self):
+        '''
+        更新服务器
+        '''
+        self.asset.server.model = self.report_data.get('model')
+        self.asset.server.os_type = self.report_data.get('os_type')
+        self.asset.server.os_distribution = self.report_data.get('os_distribution')
+        self.asset.server.os_release = self.report_data.get('os_release')
+        self.asset.server.save()
+    def _update_CPU(self):
+        '''
+        更新CPU
+        '''
+        self.asset.cpu.cpu_model = self.report_data.get('cpu_model')
+        self.asset.cpu.cpu_count = self.report_data.get('cpu_count')
+        self.asset.cpu.cpu_core_count = self.report_data.get('cpu_core_count')
+        self.asset.cpu.save()
+    def _update_RAM(self):
+        '''
+        更新RAM
+        '''
+        old_rams = models.RAM.objects.filter(asset=self.asset)
+        old_rams_dict = {}
+        if old_rams:
+            for ram in old_rams:
+                old_rams_dict[ram.slot] = ram
+        new_rams_list = self.report_data.get('ram')
+        new_rams_dict = dict()
+        if new_rams_list:
+            for item in new_rams_list:
+                new_rams_dict[item['slot']] = item
+
+        need_deleted_keys = set(old_rams_dict.keys()) -  set(new_rams_dict.keys())
+        if need_deleted_keys:
+            for key in need_deleted_keys:
+                old_rams_dict[key].delete()
+        if new_rams_dict:
+            for key in new_rams_dict:
+                defaults = {
+                    'sn': new_rams_dict[key].get('sn'),
+                    'model': new_rams_dict[key].get('model'),
+                    'manufacturer': new_rams_dict[key].get('manufacturer'),
+                    'slot': new_rams_dict[key].get('slot'),
+                    'capacity': new_rams_dict[key].get('capacity', 0),
+                }
+                models.RAM.objects.update_or_create(asset=self.asset, slot=key, defaults=defaults)
+    def _update_disk(self):
+        '''
+        更新disk
+        '''
+        old_disks = models.Disk.objects.filter(asset=self.asset)
+        old_disks_dict = {}
+        if old_disks:
+            for disk in old_disks:
+                # Error: 'Disk' object has no attribute '__getitem__'
+                #old_disks_dict[disk['sn']] = disk
+                old_disks_dict[disk.sn] = disk
+        new_disks_list = self.report_data.get('physical_disk_driver')
+        #new_disks_list = self.report_data['physical_disk_driver']
+        new_disks_dict = dict()
+        if new_disks_list:
+            for item in new_disks_list:
+                new_disks_dict[item['sn']] = item
+        need_deleted_keys = set(old_disks_dict.keys()) - set(new_disks_dict.keys())
+        if need_deleted_keys:
+            for key in need_deleted_keys:
+                old_disks_dict[key].delete()
+        if new_disks_dict:
+            for key in new_disks_dict:
+                interface_type = new_disks_dict[key].get('iface_type', 'unknown')
+                if interface_type not in ['SATA', 'SAS', 'SCSI', 'SSD', 'unknown']:
+                    interface_type = 'unknown'
+                defaults = {
+                    'slot': new_disks_dict[key].get('slot'), 
+                    'model': new_disks_dict[key].get('model'), 
+                    'manufacturer': new_disks_dict[key].get('manufacturer'), 
+                    'capacity': new_disks_dict[key].get('capacity', 0), 
+                    'interface_type': interface_type, 
+                }
+                models.Disk.objects.update_or_create(asset=self.asset, sn=key, defaults=defaults)
+
+
+    def _update_nic(self):
+        '''
+        更新nic
+        '''
+        old_nics = models.NIC.objects.filter(asset=self.asset)
+        old_nics_dict = {}
+        if old_nics:
+            for nic in old_nics:
+                old_nics_dict[nic.model + nic.mac] = nic
+        new_nics_list = self.report_data['nic']
+        new_nics_dict = dict()
+        if new_nics_list:
+            for item in new_nics_list:
+                new_nics_dict[item['model'] + item['mac']] = item
+        need_deleted_keys = set(old_nics_dict.keys()) - set(new_nics_dict.keys())
+        if need_deleted_keys:
+            for key in need_deleted_keys:
+                need_deleted_keys[key].delete()
+        if new_nics_dict:
+            for key in new_nics_dict:
+                if new_nics_dict[key].get('net_mask') and len(new_nics_dict[key].get('net_mask')) > 0:
+                    net_mask = new_nics_dict[key].get('net_mask')[0]
+                else:
+                    net_mask = ''
+                defaults = {
+                    'name': new_nics_dict[key].get('name'),
+                    'model': new_nics_dict[key].get('model'),
+                    'mac': new_nics_dict[key].get('mac'),
+                    'ip_address': new_nics_dict[key].get('ip_address'),
+                    'net_mask': net_mask,
+                    'bonding': new_nics_dict[key].get('bonding'),
+                }
+                models.NIC.objects.update_or_create(asset=self.asset, model=new_nics_dict[key].get('model'), mac=new_nics_dict[key]['mac'], defaults=defaults)

@@ -47,7 +47,7 @@ if __name__ == '__main__':
         "ram": [
             {
                 "slot": "A1",
-                "capacity": 8,
+                "capacity": 16,
                 "model": "Physical Memory",
                 "manufacturer": "kingstone ",
                 "sn": "456"
@@ -65,7 +65,7 @@ if __name__ == '__main__':
                 "sn": "3830414130423230343234362020202020202021",
                 "model": "KINGSTON SV100S264G ATA Device",
                 "manufacturer": "(标准磁盘驱动器)",
-                "capacity": 128
+                "capacity": 2280
             },
             {
                 "iface_type": "SATA",
@@ -73,7 +73,7 @@ if __name__ == '__main__':
                 "sn": "383041413042323023234362020102020202021",
                 "model": "KINGSTON SV100S264G ATA Device",
                 "manufacturer": "(标准磁盘驱动器)",
-                "capacity": 2048
+                "capacity": 4096
             },
 
         ],
@@ -129,7 +129,7 @@ if __name__ == '__main__':
         "os_release": "Ubuntu 16.04.3 LTS",
         "os_type": "Linux",
         "cpu_count": "2",
-        "cpu_core_count": "4",
+        "cpu_core_count": "8",
         "cpu_model": "Intel(R) Core(TM) i5-2300 CPU @ 2.80GHz",
         "ram": [
             {
@@ -142,7 +142,7 @@ if __name__ == '__main__':
         "physical_disk_driver": [
             {
                 "model": "VBOX HARDDISK",
-                "size": "50",
+                "size": "150",
                 "sn": "VBeee1ba73-09085303"
             }
         ]
