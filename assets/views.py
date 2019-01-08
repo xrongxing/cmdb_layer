@@ -3,6 +3,7 @@ from __future__ import unicode_literals
 
 from django.shortcuts import render
 from django.shortcuts import HttpResponse
+from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 import json
 from . import models, asset_handler
@@ -45,3 +46,13 @@ def report(request):
         else:
             return HttpResponse('数据必须要有sn')
             
+
+def dashboard(request):
+    pass
+    return render(request, 'assets/dashboard.html', locals())
+def index(request):
+    asset = models.Asset.objects.all()
+    return render(request, 'assets/index.html', locals())
+def detail(request, asset_id):
+    asset = get_object_or_404(models.Asset, id = asset_id)
+    return render(request, 'assets/detail.html', locals())
